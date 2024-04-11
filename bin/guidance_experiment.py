@@ -20,6 +20,7 @@ from uncond_ts_diff.utils import (
 )
 from uncond_ts_diff.model import TSDiff
 from uncond_ts_diff.dataset import get_gts_dataset
+from uncond_ts_diff.custom_dataset import get_custom_dataset
 from uncond_ts_diff.sampler import (
     DDPMGuidance,
     DDIMGuidance,
@@ -133,7 +134,7 @@ def main(config: dict, log_dir: str):
     # Load dataset and model
     logger.info("Loading model")
     model = load_model(config)
-    dataset = get_gts_dataset(dataset_name)
+    dataset = get_custom_dataset('datasets/dataset.jsonl', freq, prediction_length)
     assert dataset.metadata.freq == freq
     assert dataset.metadata.prediction_length == prediction_length
 
