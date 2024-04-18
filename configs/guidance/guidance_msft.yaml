@@ -1,8 +1,9 @@
 # Model & checkpoint parameters
-dataset: stocks
+dataset: msft
+dataset_path: datasets/msft_dataset.jsonl
 freq: D
 device: cuda:0
-ckpt: /content/unconditional-time-series-diffusion/lightning_logs/version_0/best_checkpoint.ckpt
+ckpt: lightning_logs/version_17/best_checkpoint.ckpt
 diffusion_config: diffusion_small_config
 context_length: 360
 prediction_length: 30

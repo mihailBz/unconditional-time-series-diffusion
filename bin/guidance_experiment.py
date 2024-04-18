@@ -2,10 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 import logging
 import argparse
+import os
 from pathlib import Path
 
 import yaml
 import torch
+import pandas as pd
+import matplotlib.pyplot as plt
 from tqdm.auto import tqdm
 from gluonts.dataset.field_names import FieldName
 from gluonts.evaluation import make_evaluation_predictions, Evaluator
@@ -26,6 +29,8 @@ from uncond_ts_diff.sampler import (
     DDIMGuidance,
 )
 import uncond_ts_diff.configs as diffusion_configs
+
+plt.style.use('seaborn')
 
 guidance_map = {"ddpm": DDPMGuidance, "ddim": DDIMGuidance}
 
@@ -114,12 +119,37 @@ def evaluate_guidance(
             predictor=predictor,
             num_samples=num_samples,
         )
+        output_dir = f'results/{config["dataset"]}_{config["setup"]}'
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
         forecasts = list(tqdm(forecast_it, total=len(transformed_testdata)))
         tss = list(ts_it)
         evaluator = Evaluator()
         metrics, _ = evaluator(tss, forecasts)
+        metrics_df = pd.DataFrame([metrics])
+        metrics_df.to_csv(os.path.join(output_dir, 'evaluation_metrics.csv'))
         metrics = filter_metrics(metrics)
         results.append(dict(**missing_data_kwargs, **metrics))
+
+        forecast_df = pd.DataFrame()
+
+        # Iterate over each time series and forecast pair
+        for i, (ts_entry, forecast_entry) in enumerate(zip(tss, forecasts)):
+            # Save forecast to DataFrame
+            forecast_series = pd.Series(forecast_entry.mean_ts.values,
+                                        name=f'forecast_{i}')  # Adjust according to your forecast object structure
+            forecast_df = pd.concat([forecast_df, forecast_series], axis=1)
+
+            # Plot and save each time series and forecast comparison
+            plt.figure(figsize=(10, 5))
+            plt.plot(ts_entry[-150:].to_timestamp(), label='Actual')  # Adjust the slicing according to your data
+            forecast_entry.plot(color='crimson', label='Forecast')
+            plt.legend()
+            plt.title(f'Forecast vs Actuals for Series {i}')
+            plt.savefig(os.path.join(output_dir, f'forecast_plot_{i}.png'))  # Save the plot as a PNG file
+            plt.close()
+        forecast_df.to_csv(os.path.join(output_dir, 'forecasts.csv'))
 
     return results
 
@@ -130,11 +160,12 @@ def main(config: dict, log_dir: str):
     freq = config["freq"]
     prediction_length = config["prediction_length"]
     num_samples = config["num_samples"]
+    dataset_path = config['dataset_path']
 
     # Load dataset and model
     logger.info("Loading model")
     model = load_model(config)
-    dataset = get_custom_dataset('datasets/dataset.jsonl', freq, prediction_length)
+    dataset = get_custom_dataset(dataset_path, freq, prediction_length)
     assert dataset.metadata.freq == freq
     assert dataset.metadata.prediction_length == prediction_length
 

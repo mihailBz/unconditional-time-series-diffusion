@@ -126,6 +126,7 @@ def main(config, log_dir):
     freq = config["freq"]
     context_length = config["context_length"]
     prediction_length = config["prediction_length"]
+    dataset_path = config['dataset_path']
     total_length = context_length + prediction_length
 
     # Create model
@@ -133,7 +134,7 @@ def main(config, log_dir):
 
     # Setup dataset and data loading
     # dataset = get_gts_dataset(dataset_name)
-    dataset = get_custom_dataset('datasets/dataset.jsonl', freq, prediction_length)
+    dataset = get_custom_dataset(dataset_path, freq, prediction_length)
     assert dataset.metadata.freq == freq
     assert dataset.metadata.prediction_length == prediction_length
 
