@@ -1,11 +1,11 @@
-ckpt: dummy/path.ckpt
+ckpt: lightning_logs/version_22/best_checkpoint.ckpt
 context_length: 360
 dataset: exchange_rate_nips
 device: cuda:0
 diffusion_config: diffusion_small_config
 freq: B
 init_skip: true
-num_samples: 100
+num_samples: 10
 prediction_length: 30
 sampler: ddpm
 sampler_params:

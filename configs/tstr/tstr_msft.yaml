@@ -1,0 +1,12 @@
+# Model & checkpoint parameters
+dataset: msft
+dataset_path: datasets/msft_dataset.jsonl
+device: cuda:0
+ckpt: lightning_logs/version_17/best_checkpoint.ckpt
+diffusion_config: diffusion_small_config
+context_length: 500
+prediction_length: 30
+use_lags: false
+use_features: false
+init_skip: true
+scaling_type: mean

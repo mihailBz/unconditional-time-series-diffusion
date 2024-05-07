@@ -1,4 +1,4 @@
-ckpt: dummy/exchange_rate_nips.ckpt
+ckpt: lightning_logs/version_22/best_checkpoint.ckpt
 context_length: 360
 dataset: exchange_rate_nips
 device: cuda:0

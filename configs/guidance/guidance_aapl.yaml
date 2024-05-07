@@ -1,0 +1,25 @@
+# Model & checkpoint parameters
+dataset: aapl
+dataset_path: datasets/aapl_dataset.jsonl
+freq: D
+device: cuda:0
+ckpt: lightning_logs/version_13/best_checkpoint.ckpt
+diffusion_config: diffusion_small_config
+context_length: 360
+prediction_length: 30
+use_lags: true
+use_features: false
+init_skip: true
+sampler: ddpm
+sampler_params:
+  guidance: quantile
+  scale: 8
+num_samples: 100
+setup: forecasting
+# The following key will be ignored,
+# if the setup is forecasting
+missing_data_configs:
+- missing_scenario: BM-B
+  missing_values: 168
+- missing_scenario: BM-E
+  missing_values: 168

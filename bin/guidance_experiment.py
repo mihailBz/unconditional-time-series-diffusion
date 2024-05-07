@@ -160,12 +160,13 @@ def main(config: dict, log_dir: str):
     freq = config["freq"]
     prediction_length = config["prediction_length"]
     num_samples = config["num_samples"]
-    dataset_path = config['dataset_path']
+    # dataset_path = config['dataset_path']
 
     # Load dataset and model
     logger.info("Loading model")
     model = load_model(config)
-    dataset = get_custom_dataset(dataset_path, freq, prediction_length)
+    # dataset = get_custom_dataset(dataset_path, freq, prediction_length)
+    dataset = get_gts_dataset(dataset_name)
     assert dataset.metadata.freq == freq
     assert dataset.metadata.prediction_length == prediction_length
 

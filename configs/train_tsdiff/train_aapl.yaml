@@ -1,0 +1,31 @@
+model: unconditional
+diffusion_config: diffusion_small_config
+normalization: mean
+use_features: False
+use_lags: False
+dataset: stocks
+dataset_path: datasets/aapl_dataset.jsonl
+freq: D
+context_length: 360 # 360 for `D`
+prediction_length: 30 # 30 for `D`
+lr: 1.e-3
+init_skip: True
+gradient_clip_val: 0.5
+max_epochs: 500
+num_batches_per_epoch: 128
+batch_size: 64
+sampler: ddpm
+sampler_params:
+  guidance: quantile
+  scale: 8
+use_validation_set: True
+eval_every: 50
+device: cuda:0
+setup: forecasting
+do_final_eval: True
+# The following key will be ignored, if the setup is forecasting
+missing_data_configs:
+- missing_scenario: BM-B
+  missing_values: 168
+- missing_scenario: BM-E
+  missing_values: 168
