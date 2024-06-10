@@ -1,4 +1,4 @@
-ckpt: dummy/electricity_nips.ckpt
+ckpt: lightning_logs/version_33/best_checkpoint.ckpt
 context_length: 336
 dataset: electricity_nips
 device: cuda:0

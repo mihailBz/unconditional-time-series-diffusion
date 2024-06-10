@@ -1,0 +1,12 @@
+# Model & checkpoint parameters
+dataset: gbm
+dataset_path: datasets/gbm.jsonl
+device: cuda:0
+ckpt: lightning_logs/version_32/best_checkpoint.ckpt
+diffusion_config: diffusion_small_config
+context_length: 360
+prediction_length: 30
+use_lags: true
+use_features: false
+init_skip: false
+scaling_type: mean
