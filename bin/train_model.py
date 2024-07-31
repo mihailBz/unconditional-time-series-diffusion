@@ -19,6 +19,7 @@ from gluonts.dataset.field_names import FieldName
 
 import uncond_ts_diff.configs as diffusion_configs
 from uncond_ts_diff.dataset import get_gts_dataset
+from uncond_ts_diff.custom_dataset import get_custom_dataset
 from uncond_ts_diff.model import TSDiff
 from uncond_ts_diff.sampler import DDPMGuidance, DDIMGuidance
 from uncond_ts_diff.utils import (
@@ -125,13 +126,14 @@ def main(config, log_dir):
     freq = config["freq"]
     context_length = config["context_length"]
     prediction_length = config["prediction_length"]
+    dataset_path = config['dataset_path']
     total_length = context_length + prediction_length
 
     # Create model
     model = create_model(config)
 
     # Setup dataset and data loading
-    dataset = get_gts_dataset(dataset_name)
+    dataset = get_custom_dataset(dataset_path, freq, prediction_length)
     assert dataset.metadata.freq == freq
     assert dataset.metadata.prediction_length == prediction_length
 
