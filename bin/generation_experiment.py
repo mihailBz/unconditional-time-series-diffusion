@@ -31,7 +31,7 @@ def main(config: dict, log_dir: str, samples_path: str):
 
     # Create log_dir
     log_dir: Path = Path(log_dir)
-    base_dirname = "tstr_log"
+    base_dirname = "generation_log"
     run_num = get_next_file_num(
         base_dirname, log_dir, file_type="", separator="-"
     )
