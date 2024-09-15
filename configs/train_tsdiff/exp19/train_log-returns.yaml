@@ -1,0 +1,25 @@
+model: unconditional
+diffusion_config: diffusion_small_config
+normalization: mean
+use_features: False
+use_lags: False
+dataset: mjd
+dataset_path: data/exp19/log-returns-0.jsonl
+freq: D
+context_length: 996 # 360 for `D`  181 (for 252)
+prediction_length: 1 # 30 for `D`  24
+lr: 1.e-3
+init_skip: False
+gradient_clip_val: 0.5
+max_epochs: 1000
+num_batches_per_epoch: 128
+batch_size: 64
+sampler: ddpm
+sampler_params:
+  guidance: quantile
+  scale: 4
+use_validation_set: True
+eval_every: 50
+device: cuda:0
+setup: forecasting
+do_final_eval: True
