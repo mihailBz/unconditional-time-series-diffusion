@@ -1,9 +1,12 @@
 import logging
 import argparse
+import math
 from pathlib import Path
 
 import yaml
 import numpy as np
+import torch
+from tqdm.auto import tqdm
 
 from gluonts.dataset.loader import TrainDataLoader
 from gluonts.itertools import Cached
@@ -19,9 +22,72 @@ from uncond_ts_diff.utils import (
     add_config_to_argparser,
 )
 from uncond_ts_diff.custom_dataset import get_custom_dataset
+from uncond_ts_diff.model import TSDiff
+import uncond_ts_diff.configs as diffusion_configs
 
-from tstr_experiment import load_model, sample_synthetic, sample_real
 
+def load_model(config):
+    model = TSDiff(
+        **getattr(
+            diffusion_configs,
+            config.get("diffusion_config", "diffusion_small_config"),
+        ),
+        freq=config["freq"],
+        use_features=config["use_features"],
+        use_lags=config["use_lags"],
+        normalization="mean",
+        context_length=config["context_length"],
+        prediction_length=config["prediction_length"],
+        init_skip=config["init_skip"],
+    )
+    model.load_state_dict(
+        torch.load(config["ckpt"], map_location="cpu"),
+        strict=True,
+    )
+    model = model.to(config["device"])
+    return model
+
+
+def sample_synthetic(
+    model: TSDiff,
+    num_samples: int = 10_000,
+    batch_size: int = 1000,
+):
+    synth_samples = []
+
+    n_iters = math.ceil(num_samples / batch_size)
+    for _ in tqdm(range(n_iters)):
+        samples = model.sample_n(num_samples=batch_size)
+        synth_samples.append(samples)
+
+    synth_samples = np.concatenate(synth_samples, axis=0)[:num_samples]
+
+    return synth_samples
+
+
+def sample_real(
+    data_loader,
+    n_timesteps: int,
+    num_samples: int = 10_000,
+    batch_size: int = 1000,
+):
+    real_samples = []
+    data_iter = iter(data_loader)
+    n_iters = math.ceil(num_samples / batch_size)
+    for _ in tqdm(range(n_iters)):
+        try:
+            batch = next(data_iter)
+        except StopIteration:
+            data_iter = iter(data_loader)
+            batch = next(data_iter)
+        ts = np.concatenate(
+            [batch["past_target"], batch["future_target"]], axis=-1
+        )[:, -n_timesteps:]
+        real_samples.append(ts)
+
+    real_samples = np.concatenate(real_samples, axis=0)[:num_samples]
+
+    return real_samples
 
 def main(config: dict, log_dir: str, samples_path: str):
     # Read global parameters
@@ -73,14 +139,14 @@ def main(config: dict, log_dir: str, samples_path: str):
     real_samples = sample_real(
         train_dataloader,
         n_timesteps=context_length + prediction_length,
-        num_samples=10000,
+        num_samples=1000,
     )
     np.save(log_dir / "real_samples.npy", real_samples)
 
     if samples_path is None:
         # Generate synthetic samples
         logger.info("Generating synthetic samples")
-        synth_samples = sample_synthetic(model, num_samples=10000)
+        synth_samples = sample_synthetic(model, num_samples=1000)
         np.save(log_dir / "synth_samples.npy", synth_samples)
     else:
         logger.info(f"Using synthetic samples from {samples_path}")
