@@ -31,7 +31,7 @@ from uncond_ts_diff.utils import (
 )
 
 guidance_map = {"ddpm": DDPMGuidance, "ddim": DDIMGuidance}
-
+torch.set_float32_matmul_precision('medium')
 
 def create_model(config):
     model = TSDiff(
