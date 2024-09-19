@@ -11,7 +11,7 @@ prediction_length: 1 # 30 for `D`  24
 lr: 1.e-3
 init_skip: False
 gradient_clip_val: 0.5
-max_epochs: 1000
+max_epochs: 500
 num_batches_per_epoch: 128
 batch_size: 64
 sampler: ddpm
