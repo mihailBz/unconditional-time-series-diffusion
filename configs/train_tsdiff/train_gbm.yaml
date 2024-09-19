@@ -4,10 +4,10 @@ normalization: mean
 use_features: False
 use_lags: False
 dataset: gbm
-dataset_path: datasets/tsdiff_dataset/gbm-1.jsonl
+dataset_path: data/exp1/gbm-0.jsonl
 freq: D
-context_length: 170 # 360 for `D`  181 (for 252)
-prediction_length: 30 # 30 for `D`  24
+context_length: 197 # 360 for `D`  181 (for 252)
+prediction_length: 1 # 30 for `D`  24
 lr: 1.e-3
 init_skip: False
 gradient_clip_val: 0.5
@@ -18,7 +18,7 @@ sampler: ddpm
 sampler_params:
   guidance: quantile
   scale: 4
-use_validation_set: True
+use_validation_set: true
 eval_every: 50
 device: cuda:0
 setup: forecasting
