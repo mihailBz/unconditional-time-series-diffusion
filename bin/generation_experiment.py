@@ -24,6 +24,7 @@ from uncond_ts_diff.utils import (
 from uncond_ts_diff.custom_dataset import get_custom_dataset
 from uncond_ts_diff.model import TSDiff
 import uncond_ts_diff.configs as diffusion_configs
+from vis_utils import visualize_timesteps_as_gif
 
 
 def load_model(config):
@@ -52,16 +53,18 @@ def sample_synthetic(
     model: TSDiff,
     num_samples: int = 10_000,
     batch_size: int = 1000,
+    return_timesteps: bool = False,
 ):
     synth_samples = []
 
     n_iters = math.ceil(num_samples / batch_size)
     for _ in tqdm(range(n_iters)):
-        samples = model.sample_n(num_samples=batch_size)
+        samples, timesteps = model.sample_n(num_samples=batch_size, return_timesteps=return_timesteps)
         synth_samples.append(samples)
 
     synth_samples = np.concatenate(synth_samples, axis=0)[:num_samples]
-
+    if return_timesteps:
+        return synth_samples, timesteps
     return synth_samples
 
 
@@ -146,7 +149,8 @@ def main(config: dict, log_dir: str, samples_path: str):
     if samples_path is None:
         # Generate synthetic samples
         logger.info("Generating synthetic samples")
-        synth_samples = sample_synthetic(model, num_samples=1000)
+        synth_samples, timesteps = sample_synthetic(model, num_samples=1000, return_timesteps=True)
+        visualize_timesteps_as_gif(timesteps, gif_name=log_dir / "timesteps_animation.gif")
         np.save(log_dir / "synth_samples.npy", synth_samples)
     else:
         logger.info(f"Using synthetic samples from {samples_path}")

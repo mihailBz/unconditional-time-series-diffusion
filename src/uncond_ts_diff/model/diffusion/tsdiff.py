@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import copy
 
+import numpy as np
 import torch
 from gluonts.torch.util import lagged_sequence_values
 
@@ -134,6 +135,7 @@ class TSDiff(TSDiffBase):
         self,
         num_samples: int = 1,
         return_lags: bool = False,
+        return_timesteps: bool = False,
     ):
         device = next(self.backbone.parameters()).device
         seq_len = self.context_length + self.prediction_length
@@ -141,16 +143,18 @@ class TSDiff(TSDiffBase):
         samples = torch.randn(
             (num_samples, seq_len, self.input_dim), device=device
         )
-
+        each_timestep_samples = []
         for i in reversed(range(0, self.timesteps)):
             t = torch.full((num_samples,), i, device=device, dtype=torch.long)
             samples = self.p_sample(samples, t, i, features=None)
-
+            each_timestep_samples.append(samples[0, ...].cpu().numpy())
+        each_timestep_samples = np.array(each_timestep_samples)
         samples = samples.cpu().numpy()
 
         if return_lags:
             return samples
-
+        if return_timesteps:
+            return samples[..., 0], each_timestep_samples
         return samples[..., 0]
 
     def on_train_batch_end(self, outputs, batch, batch_idx):
