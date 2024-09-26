@@ -18,7 +18,6 @@ from gluonts.evaluation import make_evaluation_predictions, Evaluator
 from gluonts.dataset.field_names import FieldName
 
 import uncond_ts_diff.configs as diffusion_configs
-from uncond_ts_diff.dataset import get_gts_dataset
 from uncond_ts_diff.custom_dataset import get_custom_dataset
 from uncond_ts_diff.model import TSDiff
 from uncond_ts_diff.sampler import DDPMGuidance, DDIMGuidance
@@ -161,7 +160,6 @@ def main(config, log_dir):
     val_data_loader = None
     if config["use_validation_set"]:
         val_data = training_data
-        training_data, _ = split(val_data, offset=-config["prediction_length"])
         val_splitter = create_splitter(
             past_length=config["context_length"] + max(model.lags_seq),
             future_length=config["prediction_length"],
@@ -220,12 +218,23 @@ def main(config, log_dir):
     logger.info("Training completed.")
 
     best_ckpt_path = Path(trainer.logger.log_dir) / "best_checkpoint.ckpt"
+    last_ckpt_path = Path(trainer.logger.log_dir) / "last_checkpoint.ckpt"
 
-    if not best_ckpt_path.exists():
+    if checkpoint_callback.best_model_path and not best_ckpt_path.exists():
         torch.save(
             torch.load(checkpoint_callback.best_model_path)["state_dict"],
             best_ckpt_path,
         )
+    logger.info(f"Best checkpoint saved at {best_ckpt_path}.")
+
+    if checkpoint_callback.last_model_path and not last_ckpt_path.exists():
+        torch.save(
+            torch.load(checkpoint_callback.last_model_path)["state_dict"],
+            last_ckpt_path,
+        )
+    logger.info(f"Last checkpoint saved at {last_ckpt_path}.")
+
+
     logger.info(f"Loading {best_ckpt_path}.")
     best_state_dict = torch.load(best_ckpt_path)
     model.load_state_dict(best_state_dict, strict=True)
