@@ -4,7 +4,7 @@ dataset_path: data/exp18/coif2-gbm-0.jsonl
 device: cuda:0
 ckpt: lightning_logs/version_0/best_checkpoint.ckpt
 diffusion_config: diffusion_small_config
-context_length: 238
+context_length: 240
 prediction_length: 1 
 use_lags: False
 use_features: False

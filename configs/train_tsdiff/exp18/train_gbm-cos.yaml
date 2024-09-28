@@ -6,7 +6,7 @@ use_lags: False
 dataset: gbm
 dataset_path: data/exp18/log-returns-0.jsonl 
 freq: D
-context_length: 197 # 360 for `D`  181 (for 252)
+context_length: 199 # 360 for `D`  181 (for 252)
 prediction_length: 1 # 30 for `D`  24
 lr: 1.e-3
 init_skip: False
@@ -22,4 +22,4 @@ use_validation_set: True
 eval_every: 50
 device: cuda:0
 setup: forecasting
-do_final_eval: True
+do_final_eval: False
